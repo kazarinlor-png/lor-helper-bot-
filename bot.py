@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 ЛОР-Помощник - Telegram бот для управления приемом лекарств и отслеживания симптомов
-Версия: 7.1.0 (Полностью исправленная)
+Версия: 7.2.0 (Исправленная)
 Автор: Денис Казарин (врач-оториноларинголог)
 """
 
@@ -130,21 +130,21 @@ FAMILY_CLINIC = {
     "maps": "https://yandex.ru/maps/-/CPEBA46u"
 }
 
-# Информация о враче
-DOCTOR_INFO = """👨‍⚕️ *Денис Сергеевич Казарин* - врач-оториноларинголог
+# Информация о враче (ИСПРАВЛЕНО: убраны символы Markdown, которые могли вызывать ошибку)
+DOCTOR_INFO = """👨‍⚕️ Денис Сергеевич Казарин - врач-оториноларинголог
 
-👶 *Ведет прием детей с 0 лет и взрослых*
+👶 Ведет прием детей с 0 лет и взрослых
 
-🎓 *Образование:*
+🎓 Образование:
 • 2001-2007: МГМСУ им. А.И. Евдокимова (Лечебное дело)
 • 2007-2009: Ординатура, РМАПО (Оториноларингология)
 • Доп. образование: Лазерная медицина (НПЦ лазерной медицины им. Скобелкина)
 
-🏥 *Принимает в клиниках:*
+🏥 Принимает в клиниках:
 • КИТ-клиника (Куркино)
 • Семейная клиника (Путилково)
 
-📱 *Telegram:*
+📱 Telegram:
 • Канал: @KAZARIN_LOR
 • Личный: @deniskazarin"""
 
@@ -1002,7 +1002,7 @@ async def send_reminder_job(reminder_id: int):
                 db.commit()
                 return
             
-            text = f"💊 *Время принять лекарство!*\n\n{medicine.name}"
+            text = f"💊 Время принять лекарство!\n\n{medicine.name}"
             reply_markup = get_medicine_inline_keyboard(medicine.id)
             
         elif reminder.reminder_type == 'analysis':
@@ -1018,9 +1018,9 @@ async def send_reminder_job(reminder_id: int):
                 analysis_date = analysis.scheduled_date.astimezone(pytz.UTC)
             
             scheduled_local = utc_to_local(analysis_date, analysis.user_timezone)
-            text = f"🩺 *Напоминание об анализе/исследовании!*\n\n{analysis.name}\n📅 {scheduled_local.strftime('%d.%m.%Y')} в {analysis.scheduled_time}"
+            text = f"🩺 Напоминание об анализе/исследовании!\n\n{analysis.name}\n📅 {scheduled_local.strftime('%d.%m.%Y')} в {analysis.scheduled_time}"
             if analysis.notes:
-                text += f"\n\n📝 *Заметки:* {analysis.notes}"
+                text += f"\n\n📝 Заметки: {analysis.notes}"
             
             reply_markup = get_analysis_inline_keyboard(analysis.id)
         
@@ -1034,7 +1034,7 @@ async def send_reminder_job(reminder_id: int):
                     chat_id=user_id,
                     text=text,
                     reply_markup=reply_markup,
-                    parse_mode=ParseMode.MARKDOWN
+                    parse_mode=None  # Отключаем Markdown для надежности
                 )
                 
                 reminder.status = 'sent'
@@ -1139,13 +1139,13 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     reminder_logger.info(f"🔥 ПОЛУЧЕНА КОМАНДА START от {user.id} - {user.first_name}")
     
-    welcome_text = f"""👋 *Здравствуйте, {user.first_name}!*
+    welcome_text = f"""👋 Здравствуйте, {user.first_name}!
 
-Я *ЛОР-Помощник* — персональный медицинский бот, созданный врачом-оториноларингологом Денисом Казариным.
+Я ЛОР-Помощник — персональный медицинский бот, созданный врачом-оториноларингологом Денисом Казариным.
 
-👶 *Врач ведет прием детей с 0 лет и взрослых*
+👶 Врач ведет прием детей с 0 лет и взрослых
 
-🤖 *Мои возможности:*
+🤖 Мои возможности:
 • 💊 Напоминания о приеме лекарств
 • 🩺 Напоминания об анализах и исследованиях
 • 📊 Отслеживание самочувствия
@@ -1156,13 +1156,13 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         welcome_text,
         reply_markup=get_start_keyboard(),
-        parse_mode=ParseMode.MARKDOWN
+        parse_mode=None  # Отключаем Markdown для надежности
     )
     reminder_logger.info("✅ Сообщение отправлено пользователю")
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработчик команды /help - упрощенный."""
-    help_text = """❓ *Как очистить историю переписки*
+    help_text = """❓ Как очистить историю переписки
 
 Чтобы удалить всю переписку с ботом:
 
@@ -1173,30 +1173,30 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 ✅ После этого откроется начальная страница бота
 💾 Все ваши сохраненные данные (лекарства, анализы, статистика) останутся без изменений
 
-*Ваши данные в безопасности!*"""
+Ваши данные в безопасности!"""
 
     if update.callback_query:
         await update.callback_query.edit_message_text(
             help_text,
             reply_markup=get_help_keyboard(),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
     else:
         await update.message.reply_text(
             help_text,
             reply_markup=get_help_keyboard(),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
 
 async def about_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработчик команды /about (ОБНОВЛЕНО: добавлены Telegram-ссылки)."""
     about_text = DOCTOR_INFO + f"""
 
-📍 *КИТ-клиника:*
+📍 КИТ-клиника:
 {KIT_CLINIC['address']}
 📞 {KIT_CLINIC['phone_display']}
 
-📍 *Семейная клиника:*
+📍 Семейная клиника:
 {FAMILY_CLINIC['address']}
 📞 {FAMILY_CLINIC['phone_display']}"""
 
@@ -1204,13 +1204,13 @@ async def about_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.callback_query.edit_message_text(
             about_text,
             reply_markup=get_about_keyboard(),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None  # Отключаем Markdown для надежности
         )
     else:
         await update.message.reply_text(
             about_text,
             reply_markup=get_about_keyboard(),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
 
 async def set_timezone_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1218,9 +1218,9 @@ async def set_timezone_command(update: Update, context: ContextTypes.DEFAULT_TYP
     user_id = update.effective_user.id
     current_tz = get_user_timezone(user_id)
     
-    text = f"""🕒 *Настройка часового пояса*
+    text = f"""🕒 Настройка часового пояса
 
-Ваш текущий часовой пояс: *{current_tz}*
+Ваш текущий часовой пояс: {current_tz}
 
 Выберите ваш часовой пояс из списка:"""
     
@@ -1228,30 +1228,30 @@ async def set_timezone_command(update: Update, context: ContextTypes.DEFAULT_TYP
         await update.callback_query.edit_message_text(
             text,
             reply_markup=get_timezone_keyboard(),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
     else:
         await update.message.reply_text(
             text,
             reply_markup=get_timezone_keyboard(),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
 
 async def stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработчик команды статистики."""
-    text = "📈 *Статистика*\n\nВыберите период или тип статистики:"
+    text = "📈 Статистика\n\nВыберите период или тип статистики:"
     
     if update.callback_query:
         await update.callback_query.edit_message_text(
             text,
             reply_markup=get_stats_keyboard(),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
     else:
         await update.message.reply_text(
             text,
             reply_markup=get_stats_keyboard(),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
 
 async def stats_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1283,16 +1283,16 @@ async def stats_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
             avg_mood = sum(m.mood_score for m in mood_stats) / len(mood_stats) if mood_stats else 0
             
-            text = f"""📊 *Статистика за неделю*
+            text = f"""📊 Статистика за неделю
 
-😊 *Настроение:*
+😊 Настроение:
 • Записей: {len(mood_stats)}
 • Среднее: {avg_mood:.1f}/5
 
-🩺 *Симптомы:*
+🩺 Симптомы:
 • Записей: {len(symptom_stats)}
 
-💊 *Лекарства:*
+💊 Лекарства:
 • Приемов: {len([m for m in medicine_stats if m.status == 'taken'])}
 • Пропусков: {len([m for m in medicine_stats if m.status == 'skipped'])}"""
             
@@ -1306,9 +1306,9 @@ async def stats_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
             avg_mood = sum(m.mood_score for m in mood_stats) / len(mood_stats) if mood_stats else 0
             
-            text = f"""📊 *Статистика за месяц*
+            text = f"""📊 Статистика за месяц
 
-😊 *Настроение:*
+😊 Настроение:
 • Записей: {len(mood_stats)}
 • Среднее: {avg_mood:.1f}/5"""
             
@@ -1319,16 +1319,16 @@ async def stats_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
             avg_mood = sum(m.mood_score for m in mood_stats) / len(mood_stats) if mood_stats else 0
             
-            text = f"""📊 *Вся статистика*
+            text = f"""📊 Вся статистика
 
-😊 *Настроение:*
+😊 Настроение:
 • Всего записей: {len(mood_stats)}
 • Среднее: {avg_mood:.1f}/5
 
-🩺 *Симптомы:*
+🩺 Симптомы:
 • Всего записей: {len(symptom_stats)}
 
-💊 *Лекарства:*
+💊 Лекарства:
 • Всего приемов: {len(medicine_stats)}"""
             
         elif query.data == "stats_mood":
@@ -1339,7 +1339,7 @@ async def stats_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ).order_by(MoodLog.created_at).all()
             
             if mood_stats:
-                text = "📈 *Динамика настроения:*\n\n"
+                text = "📈 Динамика настроения:\n\n"
                 for mood in mood_stats[-10:]:
                     local_time = utc_to_local(mood.created_at, get_user_timezone(user_id))
                     emoji = "😢" if mood.mood_score <=2 else "😐" if mood.mood_score==3 else "😊"
@@ -1361,7 +1361,7 @@ async def stats_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     symptom_counts[s.symptom] += 1
                     symptom_severity[s.symptom].append(s.severity)
                 
-                text = "🩺 *Статистика симптомов:*\n\n"
+                text = "🩺 Статистика симптомов:\n\n"
                 for symptom, count in sorted(symptom_counts.items(), key=lambda x: x[1], reverse=True)[:5]:
                     avg_severity = sum(symptom_severity[symptom]) / len(symptom_severity[symptom])
                     text += f"• {symptom}: {count} раз(а), средняя тяжесть {avg_severity:.1f}/5\n"
@@ -1372,19 +1372,19 @@ async def stats_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # Общая статистика по всем лекарствам
             stats = get_medicine_adherence(user_id)
             
-            text = f"""💊 *Общая статистика приема лекарств*
+            text = f"""💊 Общая статистика приема лекарств
 
 📅 За последние 30 дней:
 ✅ Всего приемов: {stats['total_taken']}
 ❌ Всего пропусков: {stats['total_skipped']}
 📊 Общая приверженность: {stats['total_adherence']:.1f}%
 
-*Детальная статистика по препаратам:*"""
+Детальная статистика по препаратам:"""
 
             await query.edit_message_text(
                 text,
                 reply_markup=get_medicine_stats_keyboard(user_id),
-                parse_mode=ParseMode.MARKDOWN
+                parse_mode=None
             )
             return
             
@@ -1392,7 +1392,7 @@ async def stats_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             medicine_id = int(query.data.replace("stats_medicine_", ""))
             stats = get_medicine_adherence(user_id, medicine_id)
             
-            text = f"""💊 *Статистика по препарату:* {stats['name']}
+            text = f"""💊 Статистика по препарату: {stats['name']}
 
 📅 За последние 30 дней:
 ✅ Принято: {stats['taken']}
@@ -1408,7 +1408,7 @@ async def stats_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     [InlineKeyboardButton("🔙 К списку лекарств", callback_data="stats_medicine_summary")],
                     get_main_menu_button()
                 ]),
-                parse_mode=ParseMode.MARKDOWN
+                parse_mode=None
             )
             return
             
@@ -1421,14 +1421,15 @@ async def stats_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 [InlineKeyboardButton("🔙 Назад", callback_data="stats")],
                 get_main_menu_button()
             ]),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
         
     except Exception as e:
         reminder_logger.error(f"STATS ERROR: {e}")
         await query.edit_message_text(
             "❌ Ошибка при получении статистики",
-            reply_markup=InlineKeyboardMarkup([get_main_menu_button()])
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+            parse_mode=None
         )
     finally:
         db.close()
@@ -1444,9 +1445,9 @@ async def add_medicine_start(update: Update, context: ContextTypes.DEFAULT_TYPE)
     context.user_data['medicine_step'] = 'name'
     
     await query.edit_message_text(
-        "💊 *Добавление лекарства*\n\n"
-        "Шаг 1/7: Введите *название лекарства*",
-        parse_mode=ParseMode.MARKDOWN
+        "💊 Добавление лекарства\n\n"
+        "Шаг 1/7: Введите название лекарства",
+        parse_mode=None
     )
     
     return MEDICINE_NAME
@@ -1457,7 +1458,8 @@ async def add_medicine_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.user_data.get('medicine_step') != 'name':
         await update.message.reply_text(
             "❌ Пожалуйста, начните добавление лекарства заново.",
-            reply_markup=InlineKeyboardMarkup([get_main_menu_button()])
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+            parse_mode=None
         )
         return ConversationHandler.END
     
@@ -1480,9 +1482,9 @@ async def add_medicine_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     
     await update.message.reply_text(
-        "Шаг 2/7: Выберите *время приема*",
+        "Шаг 2/7: Выберите время приема",
         reply_markup=InlineKeyboardMarkup(keyboard),
-        parse_mode=ParseMode.MARKDOWN
+        parse_mode=None
     )
     
     return MEDICINE_TIME
@@ -1493,7 +1495,8 @@ async def add_medicine_time_callback(update: Update, context: ContextTypes.DEFAU
     if context.user_data.get('medicine_step') != 'time' and not update.callback_query:
         await update.message.reply_text(
             "❌ Пожалуйста, начните добавление лекарства заново.",
-            reply_markup=InlineKeyboardMarkup([get_main_menu_button()])
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+            parse_mode=None
         )
         return ConversationHandler.END
     
@@ -1504,10 +1507,10 @@ async def add_medicine_time_callback(update: Update, context: ContextTypes.DEFAU
         
         if query.data == "time_custom":
             await query.edit_message_text(
-                "Введите время в формате *ЧЧ:ММ*\n"
+                "Введите время в формате ЧЧ:ММ\n"
                 "Минуты можно указывать любые (например: 9:42, 11:08, 15:30)\n"
                 "Для нескольких приемов укажите через запятую (например: 9:00,18:30)",
-                parse_mode=ParseMode.MARKDOWN
+                parse_mode=None
             )
             return MEDICINE_TIME
         
@@ -1530,9 +1533,9 @@ async def add_medicine_time_callback(update: Update, context: ContextTypes.DEFAU
         ]
         
         await query.edit_message_text(
-            "Шаг 3/7: Выберите *тип курса*",
+            "Шаг 3/7: Выберите тип курса",
             reply_markup=InlineKeyboardMarkup(keyboard),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
         return MEDICINE_COURSE_TYPE
     
@@ -1552,7 +1555,8 @@ async def add_medicine_time_callback(update: Update, context: ContextTypes.DEFAU
                     "❌ Некорректное время. Часы должны быть от 0 до 23, минуты от 0 до 59.",
                     reply_markup=InlineKeyboardMarkup([
                         [InlineKeyboardButton("🔙 Назад", callback_data="add_medicine")]
-                    ])
+                    ]),
+                    parse_mode=None
                 )
                 return MEDICINE_TIME
         elif re.match(r'^\d{1,2}:\d{2},\s*\d{1,2}:\d{2}(?:,\s*\d{1,2}:\d{2})*$', time_text.replace(' ', '')):
@@ -1574,7 +1578,8 @@ async def add_medicine_time_callback(update: Update, context: ContextTypes.DEFAU
                     "❌ Некорректное время в одном из значений.",
                     reply_markup=InlineKeyboardMarkup([
                         [InlineKeyboardButton("🔙 Назад", callback_data="add_medicine")]
-                    ])
+                    ]),
+                    parse_mode=None
                 )
                 return MEDICINE_TIME
         else:
@@ -1583,7 +1588,8 @@ async def add_medicine_time_callback(update: Update, context: ContextTypes.DEFAU
                 "Или выберите вариант из кнопок выше.",
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton("🔙 Назад", callback_data="add_medicine")]
-                ])
+                ]),
+                parse_mode=None
             )
             return MEDICINE_TIME
         
@@ -1604,9 +1610,9 @@ async def add_medicine_time_callback(update: Update, context: ContextTypes.DEFAU
         ]
         
         await update.message.reply_text(
-            "Шаг 3/7: Выберите *тип курса*",
+            "Шаг 3/7: Выберите тип курса",
             reply_markup=InlineKeyboardMarkup(keyboard),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
         return MEDICINE_COURSE_TYPE
 
@@ -1615,7 +1621,8 @@ async def add_medicine_course_type(update: Update, context: ContextTypes.DEFAULT
     if not update.callback_query:
         await update.message.reply_text(
             "❌ Пожалуйста, используйте кнопки для выбора.",
-            reply_markup=InlineKeyboardMarkup([get_main_menu_button()])
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+            parse_mode=None
         )
         return MEDICINE_COURSE_TYPE
     
@@ -1642,17 +1649,17 @@ async def add_medicine_course_type(update: Update, context: ContextTypes.DEFAULT
         ]
         
         await query.edit_message_text(
-            "Шаг 4/7: Выберите *дату начала* приема",
+            "Шаг 4/7: Выберите дату начала приема",
             reply_markup=InlineKeyboardMarkup(keyboard),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
         return MEDICINE_START_DATE
     elif course_type == 'days':
         context.user_data['medicine_step'] = 'course_days'
         await query.edit_message_text(
-            "Шаг 4/7: Выберите *количество дней* курса:",
+            "Шаг 4/7: Выберите количество дней курса:",
             reply_markup=get_course_days_keyboard(),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
         return MEDICINE_COURSE_DAYS
     else:
@@ -1672,9 +1679,9 @@ async def add_medicine_course_type(update: Update, context: ContextTypes.DEFAULT
         ]
         
         await query.edit_message_text(
-            "Шаг 4/7: Выберите *повторение курса*",
+            "Шаг 4/7: Выберите повторение курса",
             reply_markup=InlineKeyboardMarkup(keyboard),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
         return MEDICINE_REPEAT
 
@@ -1692,7 +1699,8 @@ async def add_medicine_course_days(update: Update, context: ContextTypes.DEFAULT
                 "❌ Введите число от 1 до 365",
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton("🔙 Назад", callback_data="add_medicine")]
-                ])
+                ]),
+                parse_mode=None
             )
             return MEDICINE_COURSE_DAYS
         
@@ -1711,9 +1719,9 @@ async def add_medicine_course_days(update: Update, context: ContextTypes.DEFAULT
         ]
         
         await update.message.reply_text(
-            "Шаг 5/7: Выберите *повторение курса*",
+            "Шаг 5/7: Выберите повторение курса",
             reply_markup=InlineKeyboardMarkup(keyboard),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
         return MEDICINE_REPEAT
     
@@ -1723,7 +1731,7 @@ async def add_medicine_course_days(update: Update, context: ContextTypes.DEFAULT
     if query.data == "course_days_custom":
         await query.edit_message_text(
             "Введите количество дней (от 1 до 365):",
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
         return MEDICINE_COURSE_DAYS
     
@@ -1746,9 +1754,9 @@ async def add_medicine_course_days(update: Update, context: ContextTypes.DEFAULT
     ]
     
     await query.edit_message_text(
-        "Шаг 5/7: Выберите *повторение курса*",
+        "Шаг 5/7: Выберите повторение курса",
         reply_markup=InlineKeyboardMarkup(keyboard),
-        parse_mode=ParseMode.MARKDOWN
+        parse_mode=None
     )
     
     return MEDICINE_REPEAT
@@ -1768,7 +1776,8 @@ async def add_medicine_repeat(update: Update, context: ContextTypes.DEFAULT_TYPE
                 "❌ Введите число от 1 до 365",
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton("🔙 Назад", callback_data="add_medicine")]
-                ])
+                ]),
+                parse_mode=None
             )
             return MEDICINE_REPEAT
         
@@ -1786,9 +1795,9 @@ async def add_medicine_repeat(update: Update, context: ContextTypes.DEFAULT_TYPE
         ]
         
         await update.message.reply_text(
-            "Шаг 6/7: Выберите *дату начала* приема",
+            "Шаг 6/7: Выберите дату начала приема",
             reply_markup=InlineKeyboardMarkup(keyboard),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
         return MEDICINE_START_DATE
     
@@ -1798,7 +1807,7 @@ async def add_medicine_repeat(update: Update, context: ContextTypes.DEFAULT_TYPE
     if query.data == "repeat_custom":
         await query.edit_message_text(
             "Введите количество дней для повторения (от 1 до 365):",
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
         return MEDICINE_REPEAT
     
@@ -1819,9 +1828,9 @@ async def add_medicine_repeat(update: Update, context: ContextTypes.DEFAULT_TYPE
     ]
     
     await query.edit_message_text(
-        "Шаг 6/7: Выберите *дату начала* приема",
+        "Шаг 6/7: Выберите дату начала приема",
         reply_markup=InlineKeyboardMarkup(keyboard),
-        parse_mode=ParseMode.MARKDOWN
+        parse_mode=None
     )
     
     return MEDICINE_START_DATE
@@ -1835,7 +1844,8 @@ async def add_medicine_start_date(update: Update, context: ContextTypes.DEFAULT_
     if 'medicine_data' not in context.user_data or 'name' not in context.user_data['medicine_data']:
         await update.message.reply_text(
             "❌ Ошибка данных. Пожалуйста, начните заново.",
-            reply_markup=InlineKeyboardMarkup([get_main_menu_button()])
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+            parse_mode=None
         )
         return ConversationHandler.END
     
@@ -1848,7 +1858,8 @@ async def add_medicine_start_date(update: Update, context: ContextTypes.DEFAULT_
                 "❌ Неверный формат даты. Используйте ДД.ММ.ГГГГ",
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton("🔙 Назад", callback_data="add_medicine")]
-                ])
+                ]),
+                parse_mode=None
             )
             return MEDICINE_START_DATE
         
@@ -1857,14 +1868,14 @@ async def add_medicine_start_date(update: Update, context: ContextTypes.DEFAULT_
         
         medicine_data = context.user_data['medicine_data']
         
-        confirm_text = f"""✅ *Проверьте данные:*
+        confirm_text = f"""✅ Проверьте данные:
 
-💊 *Название:* {medicine_data['name']}
-⏰ *Время:* {medicine_data['schedule']}
-📅 *Тип курса:* {medicine_data['course_type']}
-{'📊 *Дней курса:* ' + str(medicine_data.get('course_days', '')) if medicine_data.get('course_days') else ''}
-🔄 *Повторение:* {medicine_data.get('repeat_type', 'none')}
-📆 *Дата начала:* {date.strftime('%d.%m.%Y')}
+💊 Название: {medicine_data['name']}
+⏰ Время: {medicine_data['schedule']}
+📅 Тип курса: {medicine_data['course_type']}
+{'📊 Дней курса: ' + str(medicine_data.get('course_days', '')) if medicine_data.get('course_days') else ''}
+🔄 Повторение: {medicine_data.get('repeat_type', 'none')}
+📆 Дата начала: {date.strftime('%d.%m.%Y')}
 
 Всё верно?"""
         
@@ -1879,7 +1890,7 @@ async def add_medicine_start_date(update: Update, context: ContextTypes.DEFAULT_
         await update.message.reply_text(
             confirm_text,
             reply_markup=InlineKeyboardMarkup(keyboard),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
         return MEDICINE_CONFIRM
     
@@ -1894,8 +1905,8 @@ async def add_medicine_start_date(update: Update, context: ContextTypes.DEFAULT_
         context.user_data['medicine_data']['start_date'] = datetime.now(tz) + timedelta(days=1)
     elif query.data == "start_custom":
         await query.edit_message_text(
-            "Введите дату в формате *ДД.ММ.ГГГГ*",
-            parse_mode=ParseMode.MARKDOWN
+            "Введите дату в формате ДД.ММ.ГГГГ",
+            parse_mode=None
         )
         return MEDICINE_START_DATE
     else:
@@ -1904,14 +1915,14 @@ async def add_medicine_start_date(update: Update, context: ContextTypes.DEFAULT_
     medicine_data = context.user_data['medicine_data']
     context.user_data['medicine_step'] = 'confirm'
     
-    confirm_text = f"""✅ *Проверьте данные:*
+    confirm_text = f"""✅ Проверьте данные:
 
-💊 *Название:* {medicine_data['name']}
-⏰ *Время:* {medicine_data['schedule']}
-📅 *Тип курса:* {medicine_data['course_type']}
-{'📊 *Дней курса:* ' + str(medicine_data.get('course_days', '')) if medicine_data.get('course_days') else ''}
-🔄 *Повторение:* {medicine_data.get('repeat_type', 'none')}
-📆 *Дата начала:* {medicine_data['start_date'].strftime('%d.%m.%Y')}
+💊 Название: {medicine_data['name']}
+⏰ Время: {medicine_data['schedule']}
+📅 Тип курса: {medicine_data['course_type']}
+{'📊 Дней курса: ' + str(medicine_data.get('course_days', '')) if medicine_data.get('course_days') else ''}
+🔄 Повторение: {medicine_data.get('repeat_type', 'none')}
+📆 Дата начала: {medicine_data['start_date'].strftime('%d.%m.%Y')}
 
 Всё верно?"""
     
@@ -1926,7 +1937,7 @@ async def add_medicine_start_date(update: Update, context: ContextTypes.DEFAULT_
     await query.edit_message_text(
         confirm_text,
         reply_markup=InlineKeyboardMarkup(keyboard),
-        parse_mode=ParseMode.MARKDOWN
+        parse_mode=None
     )
     
     return MEDICINE_CONFIRM
@@ -1943,7 +1954,8 @@ async def add_medicine_confirm(update: Update, context: ContextTypes.DEFAULT_TYP
     if 'medicine_data' not in context.user_data or 'name' not in context.user_data['medicine_data']:
         await query.edit_message_text(
             "❌ Ошибка данных. Пожалуйста, начните заново.",
-            reply_markup=InlineKeyboardMarkup([get_main_menu_button()])
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+            parse_mode=None
         )
         return ConversationHandler.END
     
@@ -2002,12 +2014,12 @@ async def add_medicine_confirm(update: Update, context: ContextTypes.DEFAULT_TYP
         ]
         
         await query.edit_message_text(
-            "✅ *Лекарство успешно добавлено!*\n\n"
+            "✅ Лекарство успешно добавлено!\n\n"
             f"💊 {medicine.name}\n"
             f"⏰ {medicine.schedule}\n\n"
             "Напоминания настроены и будут приходить по расписанию.",
             reply_markup=InlineKeyboardMarkup(keyboard),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
         
         reminder_logger.info(f"MEDICINE - Добавлено лекарство {medicine.id} для пользователя {user_id}")
@@ -2016,10 +2028,10 @@ async def add_medicine_confirm(update: Update, context: ContextTypes.DEFAULT_TYP
         db.rollback()
         reminder_logger.error(f"MEDICINE ERROR - {e}")
         await query.edit_message_text(
-            "❌ *Ошибка при добавлении лекарства*\n\n"
+            "❌ Ошибка при добавлении лекарства\n\n"
             f"Пожалуйста, попробуйте позже.",
             reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
     
     finally:
@@ -2042,9 +2054,9 @@ async def add_analysis_start(update: Update, context: ContextTypes.DEFAULT_TYPE)
     context.user_data['analysis_step'] = 'name'
     
     await query.edit_message_text(
-        "🩺 *Добавление анализа или исследования*\n\n"
-        "Шаг 1/6: Введите *название анализа/исследования*",
-        parse_mode=ParseMode.MARKDOWN
+        "🩺 Добавление анализа или исследования\n\n"
+        "Шаг 1/6: Введите название анализа/исследования",
+        parse_mode=None
     )
     
     return ANALYSIS_NAME
@@ -2054,7 +2066,8 @@ async def add_analysis_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.user_data.get('analysis_step') != 'name':
         await update.message.reply_text(
             "❌ Пожалуйста, начните добавление анализа заново.",
-            reply_markup=InlineKeyboardMarkup([get_main_menu_button()])
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+            parse_mode=None
         )
         return ConversationHandler.END
     
@@ -2062,9 +2075,9 @@ async def add_analysis_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['analysis_step'] = 'date'
     
     await update.message.reply_text(
-        "Шаг 2/6: Выберите *дату* анализа/исследования",
+        "Шаг 2/6: Выберите дату анализа/исследования",
         reply_markup=get_analysis_date_keyboard(),
-        parse_mode=ParseMode.MARKDOWN
+        parse_mode=None
     )
     
     return ANALYSIS_DATE
@@ -2077,7 +2090,8 @@ async def add_analysis_date(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.user_data.get('analysis_step') != 'date' and not update.callback_query:
         await update.message.reply_text(
             "❌ Пожалуйста, начните добавление анализа заново.",
-            reply_markup=InlineKeyboardMarkup([get_main_menu_button()])
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+            parse_mode=None
         )
         return ConversationHandler.END
     
@@ -2088,7 +2102,8 @@ async def add_analysis_date(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not date:
             await update.message.reply_text(
                 "❌ Неверный формат даты. Используйте ДД.ММ.ГГГГ",
-                reply_markup=InlineKeyboardMarkup([get_main_menu_button()])
+                reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+                parse_mode=None
             )
             return ANALYSIS_DATE
         
@@ -2100,8 +2115,8 @@ async def add_analysis_date(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         if query.data == "analysis_date_custom":
             await query.edit_message_text(
-                "Введите дату в формате *ДД.ММ.ГГГГ*",
-                parse_mode=ParseMode.MARKDOWN
+                "Введите дату в формате ДД.ММ.ГГГГ",
+                parse_mode=None
             )
             return ANALYSIS_DATE
         
@@ -2118,23 +2133,24 @@ async def add_analysis_date(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             await query.edit_message_text(
                 "❌ Ошибка в формате даты",
-                reply_markup=InlineKeyboardMarkup([get_main_menu_button()])
+                reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+                parse_mode=None
             )
             return ANALYSIS_DATE
     
     if update.callback_query:
         await update.callback_query.edit_message_text(
-            "Шаг 3/6: Выберите *время* анализа/исследования\n\n"
+            "Шаг 3/6: Выберите время анализа/исследования\n\n"
             "Доступное время с 8:00 до 21:00",
             reply_markup=get_analysis_time_keyboard(),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
     else:
         await update.message.reply_text(
-            "Шаг 3/6: Выберите *время* анализа/исследования\n\n"
+            "Шаг 3/6: Выберите время анализа/исследования\n\n"
             "Доступное время с 8:00 до 21:00",
             reply_markup=get_analysis_time_keyboard(),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
     
     return ANALYSIS_TIME
@@ -2144,7 +2160,8 @@ async def add_analysis_time(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.user_data.get('analysis_step') != 'time' and not update.callback_query:
         await update.message.reply_text(
             "❌ Пожалуйста, начните добавление анализа заново.",
-            reply_markup=InlineKeyboardMarkup([get_main_menu_button()])
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+            parse_mode=None
         )
         return ConversationHandler.END
     
@@ -2160,13 +2177,15 @@ async def add_analysis_time(update: Update, context: ContextTypes.DEFAULT_TYPE):
             else:
                 await update.message.reply_text(
                     "❌ Время должно быть в пределах 8:00 - 21:00",
-                    reply_markup=InlineKeyboardMarkup([get_main_menu_button()])
+                    reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+                    parse_mode=None
                 )
                 return ANALYSIS_TIME
         else:
             await update.message.reply_text(
                 "❌ Неверный формат. Используйте ЧЧ:ММ (например: 9:42, 11:08)",
-                reply_markup=InlineKeyboardMarkup([get_main_menu_button()])
+                reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+                parse_mode=None
             )
             return ANALYSIS_TIME
         
@@ -2175,7 +2194,7 @@ async def add_analysis_time(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         if scheduled_date and check_existing_analysis(user_id, scheduled_date, selected_time):
             await update.message.reply_text(
-                "⚠️ *Внимание!*\n\n"
+                "⚠️ Внимание!\n\n"
                 f"На {scheduled_date.strftime('%d.%m.%Y')} в {selected_time} "
                 "уже запланирован анализ/исследование.\n\n"
                 "Вы можете:\n"
@@ -2186,7 +2205,7 @@ async def add_analysis_time(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     [InlineKeyboardButton("✅ Все равно создать", callback_data=f"time_{selected_time}")],
                     get_main_menu_button()
                 ]),
-                parse_mode=ParseMode.MARKDOWN
+                parse_mode=None
             )
             return ANALYSIS_TIME
         
@@ -2194,9 +2213,9 @@ async def add_analysis_time(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['analysis_step'] = 'repeat'
         
         await update.message.reply_text(
-            "Шаг 4/6: Выберите *повторение* анализа/исследования",
+            "Шаг 4/6: Выберите повторение анализа/исследования",
             reply_markup=get_analysis_repeat_keyboard(),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
         return ANALYSIS_REPEAT
     
@@ -2205,10 +2224,10 @@ async def add_analysis_time(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     if query.data == "time_custom":
         await query.edit_message_text(
-            "Введите время в формате *ЧЧ:ММ*\n"
+            "Введите время в формате ЧЧ:ММ\n"
             "Минуты можно указывать любые (например: 9:42, 11:08, 15:30)\n"
             "Время должно быть в пределах 8:00 - 21:00",
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
         return ANALYSIS_TIME
     
@@ -2224,7 +2243,8 @@ async def add_analysis_time(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if hour < 8 or hour > 21:
             await query.edit_message_text(
                 "❌ Время должно быть в пределах 8:00 - 21:00",
-                reply_markup=InlineKeyboardMarkup([get_main_menu_button()])
+                reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+                parse_mode=None
             )
             return ANALYSIS_TIME
         
@@ -2233,7 +2253,7 @@ async def add_analysis_time(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         if scheduled_date and check_existing_analysis(user_id, scheduled_date, selected_time):
             await query.edit_message_text(
-                "⚠️ *Внимание!*\n\n"
+                "⚠️ Внимание!\n\n"
                 f"На {scheduled_date.strftime('%d.%m.%Y')} в {selected_time} "
                 "уже запланирован анализ/исследование.\n\n"
                 "Вы можете:",
@@ -2242,7 +2262,7 @@ async def add_analysis_time(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     [InlineKeyboardButton("✅ Все равно создать", callback_data=f"time_{selected_time}")],
                     get_main_menu_button()
                 ]),
-                parse_mode=ParseMode.MARKDOWN
+                parse_mode=None
             )
             return ANALYSIS_TIME
         
@@ -2250,9 +2270,9 @@ async def add_analysis_time(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['analysis_step'] = 'repeat'
         
         await query.edit_message_text(
-            "Шаг 4/6: Выберите *повторение* анализа/исследования",
+            "Шаг 4/6: Выберите повторение анализа/исследования",
             reply_markup=get_analysis_repeat_keyboard(),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
         return ANALYSIS_REPEAT
 
@@ -2261,7 +2281,8 @@ async def add_analysis_repeat(update: Update, context: ContextTypes.DEFAULT_TYPE
     if context.user_data.get('analysis_step') != 'repeat' and not update.callback_query:
         await update.message.reply_text(
             "❌ Пожалуйста, начните добавление анализа заново.",
-            reply_markup=InlineKeyboardMarkup([get_main_menu_button()])
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+            parse_mode=None
         )
         return ConversationHandler.END
     
@@ -2276,14 +2297,15 @@ async def add_analysis_repeat(update: Update, context: ContextTypes.DEFAULT_TYPE
         except:
             await update.message.reply_text(
                 "❌ Введите число от 1 до 365",
-                reply_markup=InlineKeyboardMarkup([get_main_menu_button()])
+                reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+                parse_mode=None
             )
             return ANALYSIS_REPEAT
         
         await update.message.reply_text(
-            "Шаг 5/6: *Когда напомнить?*",
+            "Шаг 5/6: Когда напомнить?",
             reply_markup=get_reminder_before_keyboard(),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
         return ANALYSIS_REMINDER
     
@@ -2293,7 +2315,7 @@ async def add_analysis_repeat(update: Update, context: ContextTypes.DEFAULT_TYPE
     if query.data == "repeat_custom":
         await query.edit_message_text(
             "Введите интервал в днях (от 1 до 365):",
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
         return ANALYSIS_REPEAT
     
@@ -2313,10 +2335,10 @@ async def add_analysis_repeat(update: Update, context: ContextTypes.DEFAULT_TYPE
     context.user_data['analysis_step'] = 'reminder'
     
     await query.edit_message_text(
-        "Шаг 5/6: *Когда напомнить?*\n\n"
+        "Шаг 5/6: Когда напомнить?\n\n"
         "Выберите за сколько времени до исследования отправить напоминание:",
         reply_markup=get_reminder_before_keyboard(),
-        parse_mode=ParseMode.MARKDOWN
+        parse_mode=None
     )
     
     return ANALYSIS_REMINDER
@@ -2326,7 +2348,8 @@ async def add_analysis_reminder(update: Update, context: ContextTypes.DEFAULT_TY
     if context.user_data.get('analysis_step') != 'reminder' and not update.callback_query:
         await update.message.reply_text(
             "❌ Пожалуйста, начните добавление анализа заново.",
-            reply_markup=InlineKeyboardMarkup([get_main_menu_button()])
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+            parse_mode=None
         )
         return ConversationHandler.END
     
@@ -2340,13 +2363,14 @@ async def add_analysis_reminder(update: Update, context: ContextTypes.DEFAULT_TY
         except:
             await update.message.reply_text(
                 "❌ Введите число часов от 1 до 720",
-                reply_markup=InlineKeyboardMarkup([get_main_menu_button()])
+                reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+                parse_mode=None
             )
             return ANALYSIS_REMINDER
         
         await update.message.reply_text(
-            "Шаг 6/6: Введите *заметки* к анализу/исследованию (или отправьте /skip чтобы пропустить)",
-            parse_mode=ParseMode.MARKDOWN
+            "Шаг 6/6: Введите заметки к анализу/исследованию (или отправьте /skip чтобы пропустить)",
+            parse_mode=None
         )
         return ANALYSIS_NOTES
     
@@ -2356,7 +2380,7 @@ async def add_analysis_reminder(update: Update, context: ContextTypes.DEFAULT_TY
     if query.data == "remind_custom":
         await query.edit_message_text(
             "Введите количество часов (от 1 до 720):",
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
         return ANALYSIS_REMINDER
     
@@ -2378,8 +2402,8 @@ async def add_analysis_reminder(update: Update, context: ContextTypes.DEFAULT_TY
     context.user_data['analysis_step'] = 'notes'
     
     await query.edit_message_text(
-        "Шаг 6/6: Введите *заметки* к анализу/исследованию (или отправьте /skip чтобы пропустить)",
-        parse_mode=ParseMode.MARKDOWN
+        "Шаг 6/6: Введите заметки к анализу/исследованию (или отправьте /skip чтобы пропустить)",
+        parse_mode=None
     )
     
     return ANALYSIS_NOTES
@@ -2389,7 +2413,8 @@ async def add_analysis_notes(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if context.user_data.get('analysis_step') != 'notes':
         await update.message.reply_text(
             "❌ Пожалуйста, начните добавление анализа заново.",
-            reply_markup=InlineKeyboardMarkup([get_main_menu_button()])
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+            parse_mode=None
         )
         return ConversationHandler.END
     
@@ -2408,7 +2433,8 @@ async def add_analysis_notes(update: Update, context: ContextTypes.DEFAULT_TYPE)
         reminder_logger.error(f"ANALYSIS ERROR: scheduled_date not in analysis_data for user {user_id}")
         await update.message.reply_text(
             "❌ Ошибка данных. Пожалуйста, начните заново.",
-            reply_markup=InlineKeyboardMarkup([get_main_menu_button()])
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+            parse_mode=None
         )
         return ConversationHandler.END
     
@@ -2423,16 +2449,16 @@ async def add_analysis_notes(update: Update, context: ContextTypes.DEFAULT_TYPE)
         "custom": f"Каждые {analysis_data.get('repeat_interval', 'N')} дней"
     }.get(analysis_data['repeat_type'], "Одноразово")
     
-    confirm_text = f"""✅ *Проверьте данные анализа/исследования:*
+    confirm_text = f"""✅ Проверьте данные анализа/исследования:
 
-🩺 *Название:* {analysis_data['name']}
-📅 *Дата:* {scheduled_date_local.strftime('%d.%m.%Y')}
-⏰ *Время:* {analysis_data.get('scheduled_time', '12:00')}
-🔄 *Повторение:* {repeat_text}
-⏰ *Напомнить за:* {analysis_data['reminder_before']} ч."""
+🩺 Название: {analysis_data['name']}
+📅 Дата: {scheduled_date_local.strftime('%d.%m.%Y')}
+⏰ Время: {analysis_data.get('scheduled_time', '12:00')}
+🔄 Повторение: {repeat_text}
+⏰ Напомнить за: {analysis_data['reminder_before']} ч."""
 
     if analysis_data.get('notes'):
-        confirm_text += f"\n📝 *Заметки:* {analysis_data['notes']}"
+        confirm_text += f"\n📝 Заметки: {analysis_data['notes']}"
     
     confirm_text += "\n\nВсё верно?"
     
@@ -2447,7 +2473,7 @@ async def add_analysis_notes(update: Update, context: ContextTypes.DEFAULT_TYPE)
     await update.message.reply_text(
         confirm_text,
         reply_markup=InlineKeyboardMarkup(keyboard),
-        parse_mode=ParseMode.MARKDOWN
+        parse_mode=None
     )
     
     return ANALYSIS_CONFIRM
@@ -2473,7 +2499,8 @@ async def add_analysis_confirm(update: Update, context: ContextTypes.DEFAULT_TYP
         reminder_logger.error(f"ANALYSIS CONFIRM ERROR: scheduled_date missing for user {user_id}")
         await query.edit_message_text(
             "❌ Ошибка данных. Пожалуйста, начните заново.",
-            reply_markup=InlineKeyboardMarkup([get_main_menu_button()])
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+            parse_mode=None
         )
         return ConversationHandler.END
     
@@ -2532,12 +2559,12 @@ async def add_analysis_confirm(update: Update, context: ContextTypes.DEFAULT_TYP
         scheduled_local = scheduled_datetime.astimezone(pytz.timezone(tz_name))
         
         await query.edit_message_text(
-            "✅ *Анализ/исследование успешно добавлен!*\n\n"
+            "✅ Анализ/исследование успешно добавлен!\n\n"
             f"🩺 {analysis.name}\n"
             f"📅 {scheduled_local.strftime('%d.%m.%Y %H:%M')}\n\n"
             "Напоминание настроено.",
             reply_markup=InlineKeyboardMarkup(keyboard),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
         
         reminder_logger.info(f"ANALYSIS - Добавлен анализ {analysis.id} для пользователя {user_id}")
@@ -2546,10 +2573,10 @@ async def add_analysis_confirm(update: Update, context: ContextTypes.DEFAULT_TYP
         db.rollback()
         reminder_logger.error(f"ANALYSIS ERROR: {e}")
         await query.edit_message_text(
-            "❌ *Ошибка при добавлении анализа/исследования*\n\n"
+            "❌ Ошибка при добавлении анализа/исследования\n\n"
             f"Пожалуйста, попробуйте позже.",
             reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
     
     finally:
@@ -2578,17 +2605,17 @@ async def list_medicines(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ).order_by(Medicine.created_at.desc()).all()
         
         if not medicines:
-            text = "📋 *У вас нет активных лекарств*"
+            text = "📋 У вас нет активных лекарств"
             keyboard = [
                 [InlineKeyboardButton("💊 Добавить лекарство", callback_data="add_medicine")],
                 get_main_menu_button()
             ]
         else:
-            text = "📋 *Ваши лекарства:*\n\n"
+            text = "📋 Ваши лекарства:\n\n"
             keyboard = []
             
             for i, med in enumerate(medicines, 1):
-                text += f"{i}. *{med.name}*\n"
+                text += f"{i}. {med.name}\n"
                 text += f"   ⏰ {med.schedule}\n"
                 if med.start_date:
                     if med.start_date.tzinfo is None:
@@ -2616,13 +2643,13 @@ async def list_medicines(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.edit_message_text(
                 text,
                 reply_markup=reply_markup,
-                parse_mode=ParseMode.MARKDOWN
+                parse_mode=None
             )
         else:
             await update.message.reply_text(
                 text,
                 reply_markup=reply_markup,
-                parse_mode=ParseMode.MARKDOWN
+                parse_mode=None
             )
     
     finally:
@@ -2644,13 +2671,13 @@ async def list_analyses(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ).order_by(Analysis.scheduled_date.asc()).all()
         
         if not analyses:
-            text = "📋 *У вас нет запланированных анализов/исследований*"
+            text = "📋 У вас нет запланированных анализов/исследований"
             keyboard = [
                 [InlineKeyboardButton("🩺 Добавить анализ/исследование", callback_data="add_analysis")],
                 get_main_menu_button()
             ]
         else:
-            text = "📋 *Запланированные анализы/исследования:*\n\n"
+            text = "📋 Запланированные анализы/исследования:\n\n"
             keyboard = []
             
             now = datetime.now(pytz.UTC)
@@ -2672,7 +2699,7 @@ async def list_analyses(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 else:
                     status = f"🟢 Через {days_left} дн."
                 
-                text += f"{i}. *{analysis.name}*\n"
+                text += f"{i}. {analysis.name}\n"
                 text += f"   📅 {scheduled_local.strftime('%d.%m.%Y')} в {analysis.scheduled_time}\n"
                 text += f"   📊 {status}\n"
                 text += f"   ⏰ Напомнить за {analysis.reminder_before} ч.\n"
@@ -2694,13 +2721,13 @@ async def list_analyses(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.edit_message_text(
                 text,
                 reply_markup=reply_markup,
-                parse_mode=ParseMode.MARKDOWN
+                parse_mode=None
             )
         else:
             await update.message.reply_text(
                 text,
                 reply_markup=reply_markup,
-                parse_mode=ParseMode.MARKDOWN
+                parse_mode=None
             )
     
     finally:
@@ -2735,12 +2762,12 @@ async def delete_medicine(update: Update, context: ContextTypes.DEFAULT_TYPE):
             db.commit()
             
             await query.edit_message_text(
-                f"✅ Лекарство *{medicine.name}* удалено",
+                f"✅ Лекарство {medicine.name} удалено",
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton("📋 Список лекарств", callback_data="list_medicines")],
                     get_main_menu_button()
                 ]),
-                parse_mode=ParseMode.MARKDOWN
+                parse_mode=None
             )
             
             reminder_logger.info(f"MEDICINE - Удалено лекарство {medicine_id}")
@@ -2777,12 +2804,12 @@ async def delete_analysis(update: Update, context: ContextTypes.DEFAULT_TYPE):
             db.commit()
             
             await query.edit_message_text(
-                f"✅ Анализ/исследование *{analysis.name}* удален",
+                f"✅ Анализ/исследование {analysis.name} удален",
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton("📋 Список анализов/исследований", callback_data="list_analyses")],
                     get_main_menu_button()
                 ]),
-                parse_mode=ParseMode.MARKDOWN
+                parse_mode=None
             )
             
             reminder_logger.info(f"ANALYSIS - Удален анализ {analysis_id}")
@@ -2793,19 +2820,19 @@ async def delete_analysis(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ============== ОБРАБОТЧИКИ САМОЧУВСТВИЯ ==============
 async def mood_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Оценка самочувствия."""
-    text = "📊 *Как вы себя чувствуете сегодня?*\n\nОцените по 5-балльной шкале:"
+    text = "📊 Как вы себя чувствуете сегодня?\n\nОцените по 5-балльной шкале:"
     
     if update.callback_query:
         await update.callback_query.edit_message_text(
             text,
             reply_markup=get_mood_keyboard(),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
     else:
         await update.message.reply_text(
             text,
             reply_markup=get_mood_keyboard(),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
 
 async def mood_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -2832,7 +2859,7 @@ async def mood_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         if len(recent_moods) == 2:
             if all(m.mood_score <= 2 for m in recent_moods):
-                warning_text = """⚠️ *Внимание!*
+                warning_text = """⚠️ Внимание!
 
 Зафиксировано ухудшение самочувствия два дня подряд.
 
@@ -2851,7 +2878,7 @@ async def mood_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     chat_id=user_id,
                     text=warning_text,
                     reply_markup=InlineKeyboardMarkup(keyboard),
-                    parse_mode=ParseMode.MARKDOWN
+                    parse_mode=None
                 )
         
         mood_texts = {
@@ -2870,7 +2897,7 @@ async def mood_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(
             f"✅ {mood_texts[mood_score]}",
             reply_markup=InlineKeyboardMarkup(keyboard),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
         
     finally:
@@ -2893,17 +2920,17 @@ async def doctor_visited(update: Update, context: ContextTypes.DEFAULT_TYPE):
         db.commit()
         
         await query.edit_message_text(
-            "✅ *Визит к врачу отмечен!*\n\n"
+            "✅ Визит к врачу отмечен!\n\n"
             "Хорошо, что вы обратились к специалисту. Берегите себя!",
             reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
     finally:
         db.close()
 
 async def symptoms_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Отслеживание симптомов."""
-    text = "🩺 *Какие симптомы вас беспокоят?*\n\nВведите симптом текстом:"
+    text = "🩺 Какие симптомы вас беспокоят?\n\nВведите симптом текстом:"
     
     if update.callback_query:
         await update.callback_query.edit_message_text(
@@ -2912,7 +2939,7 @@ async def symptoms_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 [InlineKeyboardButton("🔙 Назад", callback_data="mood")],
                 get_main_menu_button()
             ]),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
     else:
         await update.message.reply_text(
@@ -2921,7 +2948,7 @@ async def symptoms_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 [InlineKeyboardButton("🔙 Назад", callback_data="mood")],
                 get_main_menu_button()
             ]),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
     
     return SYMPTOM_TEXT
@@ -2932,7 +2959,7 @@ async def symptom_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['symptom_step'] = 'severity'
     
     await update.message.reply_text(
-        "🩺 *Оцените тяжесть симптома*\n\n"
+        "🩺 Оцените тяжесть симптома\n\n"
         "Шкала тяжести (возрастание от 1 до 5):\n"
         "1 - Минимальная\n"
         "2 - Легкая\n"
@@ -2940,7 +2967,7 @@ async def symptom_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "4 - Сильная\n"
         "5 - Максимальная",
         reply_markup=get_symptom_severity_keyboard(),
-        parse_mode=ParseMode.MARKDOWN
+        parse_mode=None
     )
     
     return SYMPTOM_SEVERITY
@@ -2973,14 +3000,14 @@ async def symptom_severity(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }
         
         await query.edit_message_text(
-            f"✅ *Симптом зафиксирован:*\n\n"
+            f"✅ Симптом зафиксирован:\n\n"
             f"🤒 {symptom}\n"
             f"📊 {severity_texts[severity]}",
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("➕ Добавить еще симптом", callback_data="symptoms")],
                 get_main_menu_button()
             ]),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
         
     finally:
@@ -3021,12 +3048,12 @@ async def medicine_take(update: Update, context: ContextTypes.DEFAULT_TYPE):
         db.commit()
         
         await query.edit_message_text(
-            "✅ *Отлично!*\n\nПрием лекарства отмечен.",
+            "✅ Отлично!\n\nПрием лекарства отмечен.",
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("📋 Список лекарств", callback_data="list_medicines")],
                 get_main_menu_button()
             ]),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
         
     finally:
@@ -3061,12 +3088,12 @@ async def medicine_skip(update: Update, context: ContextTypes.DEFAULT_TYPE):
         db.commit()
         
         await query.edit_message_text(
-            "❌ *Прием пропущен*",
+            "❌ Прием пропущен",
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("📋 Список лекарств", callback_data="list_medicines")],
                 get_main_menu_button()
             ]),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
         
     finally:
@@ -3105,12 +3132,12 @@ async def analysis_take(update: Update, context: ContextTypes.DEFAULT_TYPE):
         db.commit()
         
         await query.edit_message_text(
-            "✅ *Отлично!*\n\nСдача анализа/исследования отмечена.",
+            "✅ Отлично!\n\nСдача анализа/исследования отмечена.",
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("📋 Список анализов/исследований", callback_data="list_analyses")],
                 get_main_menu_button()
             ]),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
         
     finally:
@@ -3149,12 +3176,12 @@ async def analysis_skip(update: Update, context: ContextTypes.DEFAULT_TYPE):
         db.commit()
         
         await query.edit_message_text(
-            "❌ *Анализ/исследование пропущен*",
+            "❌ Анализ/исследование пропущен",
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("📋 Список анализов/исследований", callback_data="list_analyses")],
                 get_main_menu_button()
             ]),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=None
         )
         
     finally:
@@ -3172,13 +3199,13 @@ async def timezone_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     set_user_timezone(user_id, tz_name)
     
     await query.edit_message_text(
-        f"✅ *Часовой пояс установлен*\n\n"
-        f"Ваш часовой пояс: *{tz_name}*",
+        f"✅ Часовой пояс установлен\n\n"
+        f"Ваш часовой пояс: {tz_name}",
         reply_markup=InlineKeyboardMarkup([
             [InlineKeyboardButton("🔙 Назад", callback_data="help")],
             get_main_menu_button()
         ]),
-        parse_mode=ParseMode.MARKDOWN
+        parse_mode=None
     )
 
 # ============== ОБРАБОТЧИКИ КНОПОК ==============
@@ -3279,7 +3306,8 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("🔙 Назад", callback_data="about")],
                 get_main_menu_button()
-            ])
+            ]),
+            parse_mode=None
         )
     elif data == "phone_family":
         await query.answer()
@@ -3289,7 +3317,8 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("🔙 Назад", callback_data="about")],
                 get_main_menu_button()
-            ])
+            ]),
+            parse_mode=None
         )
     else:
         await query.answer("Функция в разработке")
@@ -3301,13 +3330,13 @@ async def start_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     user = update.effective_user
     
-    welcome_text = f"""👋 *Здравствуйте, {user.first_name}!*
+    welcome_text = f"""👋 Здравствуйте, {user.first_name}!
 
-Я *ЛОР-Помощник* — персональный медицинский бот, созданный врачом-оториноларингологом Денисом Казариным.
+Я ЛОР-Помощник — персональный медицинский бот, созданный врачом-оториноларингологом Денисом Казариным.
 
-👶 *Врач ведет прием детей с 0 лет и взрослых*
+👶 Врач ведет прием детей с 0 лет и взрослых
 
-🤖 *Мои возможности:*
+🤖 Мои возможности:
 • 💊 Напоминания о приеме лекарств
 • 🩺 Напоминания об анализах и исследованиях
 • 📊 Отслеживание самочувствия
@@ -3318,7 +3347,7 @@ async def start_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.edit_message_text(
         welcome_text,
         reply_markup=get_start_keyboard(),
-        parse_mode=ParseMode.MARKDOWN
+        parse_mode=None
     )
 
 # ============== ЕЖЕДНЕВНЫЙ ОПРОС ==============
@@ -3334,14 +3363,14 @@ async def daily_mood_check(context: ContextTypes.DEFAULT_TYPE):
                 now_local = datetime.now(user_tz)
                 
                 if 20 <= now_local.hour <= 22:
-                    text = "📊 *Как вы себя чувствуете сегодня?*\n\nОцените свое самочувствие по 5-балльной шкале:"
+                    text = "📊 Как вы себя чувствуете сегодня?\n\nОцените свое самочувствие по 5-балльной шкале:"
                     
                     await rate_limiter.acquire(user.user_id)
                     await context.bot.send_message(
                         chat_id=user.user_id,
                         text=text,
                         reply_markup=get_mood_keyboard(),
-                        parse_mode=ParseMode.MARKDOWN
+                        parse_mode=None
                     )
             except Exception as e:
                 reminder_logger.error(f"DAILY MOOD ERROR for user {user.user_id}: {e}")
@@ -3500,12 +3529,14 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.callback_query:
         await update.callback_query.edit_message_text(
             "❌ Операция отменена",
-            reply_markup=InlineKeyboardMarkup([get_main_menu_button()])
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+            parse_mode=None
         )
     else:
         await update.message.reply_text(
             "❌ Операция отменена",
-            reply_markup=InlineKeyboardMarkup([get_main_menu_button()])
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+            parse_mode=None
         )
     return ConversationHandler.END
 
@@ -3521,7 +3552,7 @@ async def main():
         return
     
     print("🚀 Запуск ЛОР-Помощника...")
-    print("📊 Версия: 7.1.0 (Полностью исправленная)")
+    print("📊 Версия: 7.2.0 (Исправленная)")
     print("⏰ Часовой пояс: UTC (все времена в БД)")
     print("💾 Job store: SQLAlchemyJobStore (persistent)")
     print("🔄 Retry: 3 попытки")
