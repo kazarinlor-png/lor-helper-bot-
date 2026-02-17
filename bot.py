@@ -1428,20 +1428,18 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 📊 Отслеживайте самочувствие - кнопка "📊 Самочувствие"
 
-❓ Если что-то непонятно - нажмите "❓ Помощь" """
+❓ Если что-то непонятно - нажмите "❓ Помощь"
+
+Выберите действие в меню ниже:"""
     else:
         welcome_text = f"""👋 С возвращением, {user.first_name}!
 
-Чем могу помочь сегодня?"""
+Чем могу помочь сегодня?
+
+Выберите действие в меню ниже:"""
     
     await update.message.reply_text(
         welcome_text,
-        reply_markup=get_start_keyboard(),
-        parse_mode=None
-    )
-    
-    await update.message.reply_text(
-        "Выберите действие:",
         reply_markup=get_start_keyboard(),
         parse_mode=None
     )
