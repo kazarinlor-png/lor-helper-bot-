@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 ЛОР-Помощник - Telegram бот для управления приемом лекарств и отслеживания симптомов
-Версия: 8.1.0 (Стабильная)
+Версия: 9.0.0 (Финальная с улучшенным интерфейсом)
 Автор: Денис Казарин (врач-оториноларинголог)
 """
 
@@ -741,31 +741,28 @@ def add_main_menu_button(keyboard):
 
 # ============== КЛАВИАТУРЫ ==============
 def get_start_keyboard():
-    """Клавиатура для /start."""
+    """Клавиатура для /start - обновленная структура."""
     keyboard = [
         [
             InlineKeyboardButton("💊 Добавить лекарство", callback_data="add_medicine"),
-            InlineKeyboardButton("🩺 Добавить анализ/исследование", callback_data="add_analysis"),
         ],
         [
             InlineKeyboardButton("📋 Список лекарств", callback_data="list_medicines"),
+        ],
+        [
+            InlineKeyboardButton("💊 Принять препарат", callback_data="extra_medicine"),
+        ],
+        [
+            InlineKeyboardButton("🩺 Добавить анализ/исследование", callback_data="add_analysis"),
+        ],
+        [
             InlineKeyboardButton("📋 Список анализов/исследований", callback_data="list_analyses"),
         ],
         [
             InlineKeyboardButton("📊 Самочувствие", callback_data="mood"),
+        ],
+        [
             InlineKeyboardButton("📈 Статистика", callback_data="stats"),
-        ],
-        [
-            InlineKeyboardButton("💊 Принять препарат", callback_data="extra_medicine"),
-            InlineKeyboardButton("❓ Помощь", callback_data="help"),
-        ],
-        [
-            InlineKeyboardButton("🏥 КИТ-клиника", url=KIT_CLINIC['site']),
-            InlineKeyboardButton("🏥 Семейная клиника", url=FAMILY_CLINIC['site']),
-        ],
-        [
-            InlineKeyboardButton("🗺️ Карты Куркино", url=KIT_CLINIC['maps']),
-            InlineKeyboardButton("🗺️ Карты Путилково", url=FAMILY_CLINIC['maps']),
         ],
         [
             InlineKeyboardButton("👨‍⚕️ О враче", callback_data="about"),
@@ -792,21 +789,30 @@ def get_navigation_keyboard(back_callback="start"):
     return InlineKeyboardMarkup(keyboard)
 
 def get_about_keyboard():
-    """Клавиатура для /about."""
+    """Клавиатура для /about - обновленная структура."""
     keyboard = [
         [
             InlineKeyboardButton("📱 Telegram канал", url="https://t.me/KAZARIN_LOR"),
+        ],
+        [
             InlineKeyboardButton("👨‍⚕️ Мой Telegram", url="https://t.me/deniskazarin"),
         ],
         [
             InlineKeyboardButton("🏥 КИТ-клиника", url=KIT_CLINIC['site']),
-            InlineKeyboardButton("📞 Позвонить", callback_data="phone_kit"),
-            InlineKeyboardButton("🗺️ Карты", url=KIT_CLINIC['maps']),
         ],
         [
-            InlineKeyboardButton("🏥 Семейная", url=FAMILY_CLINIC['site']),
-            InlineKeyboardButton("📞 Позвонить", callback_data="phone_family"),
-            InlineKeyboardButton("🗺️ Карты", url=FAMILY_CLINIC['maps']),
+            InlineKeyboardButton("📞 Позвонить в КИТ", callback_data="phone_kit"),
+            InlineKeyboardButton("🗺️ Карты КИТ", url=KIT_CLINIC['maps']),
+        ],
+        [
+            InlineKeyboardButton("🏥 Семейная клиника", url=FAMILY_CLINIC['site']),
+        ],
+        [
+            InlineKeyboardButton("📞 Позвонить в Семейную", callback_data="phone_family"),
+            InlineKeyboardButton("🗺️ Карты Семейной", url=FAMILY_CLINIC['maps']),
+        ],
+        [
+            InlineKeyboardButton("❓ Помощь", callback_data="help"),
         ],
         [
             InlineKeyboardButton("🔙 Назад", callback_data="start"),
@@ -822,7 +828,7 @@ def get_help_keyboard():
             InlineKeyboardButton("❓ Как очистить историю", callback_data="help_clear"),
         ],
         [
-            InlineKeyboardButton("🔙 Назад", callback_data="start"),
+            InlineKeyboardButton("🔙 Назад", callback_data="about"),
             get_main_menu_button()[0]
         ]
     ]
@@ -1082,20 +1088,21 @@ def get_analysis_repeat_keyboard():
     return InlineKeyboardMarkup(keyboard)
 
 def get_reminder_before_keyboard():
-    """Клавиатура для выбора времени напоминания."""
+    """Клавиатура для выбора времени напоминания (в минутах)."""
     keyboard = [
         [
-            InlineKeyboardButton("⏰ 1ч", callback_data="remind_1"),
-            InlineKeyboardButton("⏰ 3ч", callback_data="remind_3"),
-            InlineKeyboardButton("⏰ 12ч", callback_data="remind_12"),
+            InlineKeyboardButton("⏰ 15 мин", callback_data="remind_15"),
+            InlineKeyboardButton("⏰ 30 мин", callback_data="remind_30"),
+            InlineKeyboardButton("⏰ 1 час", callback_data="remind_60"),
         ],
         [
-            InlineKeyboardButton("⏰ 24ч", callback_data="remind_24"),
-            InlineKeyboardButton("⏰ 2д", callback_data="remind_48"),
-            InlineKeyboardButton("⏰ 3д", callback_data="remind_72"),
+            InlineKeyboardButton("⏰ 2 часа", callback_data="remind_120"),
+            InlineKeyboardButton("⏰ 3 часа", callback_data="remind_180"),
+            InlineKeyboardButton("⏰ 6 часов", callback_data="remind_360"),
         ],
         [
-            InlineKeyboardButton("⏰ 7д", callback_data="remind_168"),
+            InlineKeyboardButton("⏰ 12 часов", callback_data="remind_720"),
+            InlineKeyboardButton("⏰ 24 часа", callback_data="remind_1440"),
             InlineKeyboardButton("⚙️ Свое", callback_data="remind_custom"),
         ],
         [
@@ -1180,10 +1187,6 @@ def get_medicine_stats_keyboard(user_id: int):
     ])
     
     return InlineKeyboardMarkup(keyboard)
-
-def get_extra_medicine_keyboard():
-    """Клавиатура для выбора лекарства при незапланированном приеме."""
-    return [InlineKeyboardButton("💊 Выбрать лекарство", callback_data="extra_medicine_select")]
 
 # ============== ФУНКЦИИ ОТПРАВКИ НАПОМИНАНИЙ ==============
 async def send_reminder_job(reminder_id: int):
@@ -1428,7 +1431,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 📊 Отслеживайте самочувствие - кнопка "📊 Самочувствие"
 
-❓ Если что-то непонятно - нажмите "❓ Помощь"
+❓ Если что-то непонятно - зайдите в раздел "👨‍⚕️ О враче" и нажмите "❓ Помощь"
 
 Выберите действие в меню ниже:"""
     else:
@@ -1845,9 +1848,16 @@ async def extra_medicine_select(update: Update, context: ContextTypes.DEFAULT_TY
     medicine_id = int(query.data.replace("extra_medicine_select_", ""))
     context.user_data['extra_medicine_id'] = medicine_id
     
+    # Создаем клавиатуру с кнопкой "Пропустить"
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton("⏭️ Пропустить", callback_data="skip_dosage")],
+        get_main_menu_button()
+    ])
+    
     await query.edit_message_text(
         "💊 Укажите принятую дозу (например: 1 таблетка, 5 мл):\n\n"
-        "Или отправьте /skip чтобы пропустить",
+        "Или нажмите кнопку ниже, чтобы пропустить",
+        reply_markup=keyboard,
         parse_mode=None
     )
     
@@ -1855,22 +1865,47 @@ async def extra_medicine_select(update: Update, context: ContextTypes.DEFAULT_TY
 
 async def extra_medicine_dosage(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Сохранение дозы для незапланированного приема."""
-    if update.message.text == "/skip":
+    if update.callback_query:
+        query = update.callback_query
+        await query.answer()
+        if query.data == "skip_dosage":
+            context.user_data['extra_dosage'] = None
+    elif update.message.text == "/skip":
         context.user_data['extra_dosage'] = None
     else:
         context.user_data['extra_dosage'] = update.message.text
     
-    await update.message.reply_text(
-        "📝 Добавьте комментарий к приему (почему приняли, самочувствие и т.д.):\n\n"
-        "Или отправьте /skip чтобы пропустить",
-        parse_mode=None
-    )
+    # Создаем клавиатуру с кнопкой "Пропустить"
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton("⏭️ Пропустить", callback_data="skip_comment")],
+        get_main_menu_button()
+    ])
+    
+    if update.callback_query:
+        await update.callback_query.edit_message_text(
+            "📝 Добавьте комментарий к приему (почему приняли, самочувствие и т.д.):\n\n"
+            "Или нажмите кнопку ниже, чтобы пропустить",
+            reply_markup=keyboard,
+            parse_mode=None
+        )
+    else:
+        await update.message.reply_text(
+            "📝 Добавьте комментарий к приему (почему приняли, самочувствие и т.д.):\n\n"
+            "Или нажмите кнопку ниже, чтобы пропустить",
+            reply_markup=keyboard,
+            parse_mode=None
+        )
     
     return MEDICINE_COMMENT
 
 async def extra_medicine_comment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Сохранение комментария и завершение незапланированного приема."""
-    if update.message.text == "/skip":
+    if update.callback_query:
+        query = update.callback_query
+        await query.answer()
+        if query.data == "skip_comment":
+            comment = None
+    elif update.message.text == "/skip":
         comment = None
     else:
         comment = update.message.text
@@ -1880,22 +1915,38 @@ async def extra_medicine_comment(update: Update, context: ContextTypes.DEFAULT_T
     dosage = context.user_data.get('extra_dosage')
     
     if not medicine_id:
-        await update.message.reply_text(
-            "❌ Ошибка. Пожалуйста, начните заново.",
-            reply_markup=get_start_keyboard(),
-            parse_mode=None
-        )
+        error_text = "❌ Ошибка. Пожалуйста, начните заново."
+        if update.callback_query:
+            await update.callback_query.edit_message_text(
+                error_text,
+                reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+                parse_mode=None
+            )
+        else:
+            await update.message.reply_text(
+                error_text,
+                reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+                parse_mode=None
+            )
         return ConversationHandler.END
     
     db = get_db()
     try:
         medicine = db.query(Medicine).filter_by(id=medicine_id).first()
         if not medicine:
-            await update.message.reply_text(
-                "❌ Лекарство не найдено.",
-                reply_markup=get_start_keyboard(),
-                parse_mode=None
-            )
+            error_text = "❌ Лекарство не найдено."
+            if update.callback_query:
+                await update.callback_query.edit_message_text(
+                    error_text,
+                    reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+                    parse_mode=None
+                )
+            else:
+                await update.message.reply_text(
+                    error_text,
+                    reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+                    parse_mode=None
+                )
             return ConversationHandler.END
         
         # Сохраняем информацию о курсе на момент приема
@@ -1928,19 +1979,34 @@ async def extra_medicine_comment(update: Update, context: ContextTypes.DEFAULT_T
             get_main_menu_button()
         ]
         
-        await update.message.reply_text(
-            success_text,
-            reply_markup=InlineKeyboardMarkup(keyboard),
-            parse_mode=None
-        )
+        if update.callback_query:
+            await update.callback_query.edit_message_text(
+                success_text,
+                reply_markup=InlineKeyboardMarkup(keyboard),
+                parse_mode=None
+            )
+        else:
+            await update.message.reply_text(
+                success_text,
+                reply_markup=InlineKeyboardMarkup(keyboard),
+                parse_mode=None
+            )
         
     except Exception as e:
         reminder_logger.error(f"EXTRA MEDICINE ERROR: {e}")
-        await update.message.reply_text(
-            "❌ Ошибка при сохранении приема.",
-            reply_markup=get_start_keyboard(),
-            parse_mode=None
-        )
+        error_text = "❌ Ошибка при сохранении приема."
+        if update.callback_query:
+            await update.callback_query.edit_message_text(
+                error_text,
+                reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+                parse_mode=None
+            )
+        else:
+            await update.message.reply_text(
+                error_text,
+                reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
+                parse_mode=None
+            )
     finally:
         db.close()
         # Очищаем данные
@@ -1976,7 +2042,7 @@ async def medicine_comment_save(update: Update, context: ContextTypes.DEFAULT_TY
     if not medicine_id:
         await update.message.reply_text(
             "❌ Ошибка. Пожалуйста, начните заново.",
-            reply_markup=get_start_keyboard(),
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
             parse_mode=None
         )
         return ConversationHandler.END
@@ -2015,7 +2081,7 @@ async def medicine_comment_save(update: Update, context: ContextTypes.DEFAULT_TY
         reminder_logger.error(f"COMMENT ERROR: {e}")
         await update.message.reply_text(
             "❌ Ошибка при сохранении комментария.",
-            reply_markup=get_start_keyboard(),
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
             parse_mode=None
         )
     finally:
@@ -2086,7 +2152,7 @@ async def process_medicine_postpone(update: Update, context: ContextTypes.DEFAUL
     if not medicine_id:
         await update.message.reply_text(
             "❌ Ошибка. Пожалуйста, начните заново.",
-            reply_markup=get_start_keyboard(),
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
             parse_mode=None
         )
         return
@@ -2097,7 +2163,7 @@ async def process_medicine_postpone(update: Update, context: ContextTypes.DEFAUL
         if not medicine:
             await update.message.reply_text(
                 "❌ Лекарство не найдено.",
-                reply_markup=get_start_keyboard(),
+                reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
                 parse_mode=None
             )
             return
@@ -2138,7 +2204,7 @@ async def process_medicine_postpone(update: Update, context: ContextTypes.DEFAUL
         else:
             await update.message.reply_text(
                 "❌ Активное напоминание не найдено.",
-                reply_markup=get_start_keyboard(),
+                reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
                 parse_mode=None
             )
         
@@ -2146,7 +2212,7 @@ async def process_medicine_postpone(update: Update, context: ContextTypes.DEFAUL
         reminder_logger.error(f"POSTPONE MEDICINE ERROR: {e}")
         await update.message.reply_text(
             "❌ Ошибка при откладывании.",
-            reply_markup=get_start_keyboard(),
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
             parse_mode=None
         )
     finally:
@@ -2212,7 +2278,7 @@ async def process_medicine_pause(update: Update, context: ContextTypes.DEFAULT_T
     if not medicine_id:
         await update.message.reply_text(
             "❌ Ошибка. Пожалуйста, начните заново.",
-            reply_markup=get_start_keyboard(),
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
             parse_mode=None
         )
         return
@@ -2223,7 +2289,7 @@ async def process_medicine_pause(update: Update, context: ContextTypes.DEFAULT_T
         if not medicine:
             await update.message.reply_text(
                 "❌ Лекарство не найдено.",
-                reply_markup=get_start_keyboard(),
+                reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
                 parse_mode=None
             )
             return
@@ -2266,7 +2332,7 @@ async def process_medicine_pause(update: Update, context: ContextTypes.DEFAULT_T
         reminder_logger.error(f"PAUSE MEDICINE ERROR: {e}")
         await update.message.reply_text(
             "❌ Ошибка при приостановке курса.",
-            reply_markup=get_start_keyboard(),
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
             parse_mode=None
         )
     finally:
@@ -2314,7 +2380,7 @@ async def cancel_medicine(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             await query.edit_message_text(
                 "❌ Лекарство не найдено.",
-                reply_markup=get_start_keyboard(),
+                reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
                 parse_mode=None
             )
     finally:
@@ -2379,7 +2445,7 @@ async def process_analysis_postpone(update: Update, context: ContextTypes.DEFAUL
     if not analysis_id:
         await update.message.reply_text(
             "❌ Ошибка. Пожалуйста, начните заново.",
-            reply_markup=get_start_keyboard(),
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
             parse_mode=None
         )
         return
@@ -2390,7 +2456,7 @@ async def process_analysis_postpone(update: Update, context: ContextTypes.DEFAUL
         if not analysis:
             await update.message.reply_text(
                 "❌ Анализ не найден.",
-                reply_markup=get_start_keyboard(),
+                reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
                 parse_mode=None
             )
             return
@@ -2431,7 +2497,7 @@ async def process_analysis_postpone(update: Update, context: ContextTypes.DEFAUL
         else:
             await update.message.reply_text(
                 "❌ Активное напоминание не найдено.",
-                reply_markup=get_start_keyboard(),
+                reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
                 parse_mode=None
             )
         
@@ -2439,7 +2505,7 @@ async def process_analysis_postpone(update: Update, context: ContextTypes.DEFAUL
         reminder_logger.error(f"POSTPONE ANALYSIS ERROR: {e}")
         await update.message.reply_text(
             "❌ Ошибка при откладывании.",
-            reply_markup=get_start_keyboard(),
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
             parse_mode=None
         )
     finally:
@@ -2504,7 +2570,7 @@ async def process_analysis_pause(update: Update, context: ContextTypes.DEFAULT_T
     if not analysis_id:
         await update.message.reply_text(
             "❌ Ошибка. Пожалуйста, начните заново.",
-            reply_markup=get_start_keyboard(),
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
             parse_mode=None
         )
         return
@@ -2515,7 +2581,7 @@ async def process_analysis_pause(update: Update, context: ContextTypes.DEFAULT_T
         if not analysis:
             await update.message.reply_text(
                 "❌ Анализ не найден.",
-                reply_markup=get_start_keyboard(),
+                reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
                 parse_mode=None
             )
             return
@@ -2557,7 +2623,7 @@ async def process_analysis_pause(update: Update, context: ContextTypes.DEFAULT_T
         reminder_logger.error(f"PAUSE ANALYSIS ERROR: {e}")
         await update.message.reply_text(
             "❌ Ошибка при приостановке.",
-            reply_markup=get_start_keyboard(),
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
             parse_mode=None
         )
     finally:
@@ -2604,7 +2670,7 @@ async def cancel_analysis(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             await query.edit_message_text(
                 "❌ Анализ не найден.",
-                reply_markup=get_start_keyboard(),
+                reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
                 parse_mode=None
             )
     finally:
@@ -2633,7 +2699,7 @@ async def analysis_notes_save(update: Update, context: ContextTypes.DEFAULT_TYPE
     if not analysis_id:
         await update.message.reply_text(
             "❌ Ошибка. Пожалуйста, начните заново.",
-            reply_markup=get_start_keyboard(),
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
             parse_mode=None
         )
         return ConversationHandler.END
@@ -2656,14 +2722,14 @@ async def analysis_notes_save(update: Update, context: ContextTypes.DEFAULT_TYPE
         else:
             await update.message.reply_text(
                 "❌ Анализ не найден.",
-                reply_markup=get_start_keyboard(),
+                reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
                 parse_mode=None
             )
     except Exception as e:
         reminder_logger.error(f"NOTES ERROR: {e}")
         await update.message.reply_text(
             "❌ Ошибка при сохранении заметок.",
-            reply_markup=get_start_keyboard(),
+            reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
             parse_mode=None
         )
     finally:
@@ -3610,7 +3676,7 @@ async def add_analysis_repeat(update: Update, context: ContextTypes.DEFAULT_TYPE
     return ANALYSIS_REMINDER
 
 async def add_analysis_reminder(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Обработка выбора времени напоминания."""
+    """Обработка выбора времени напоминания (в минутах)."""
     if context.user_data.get('analysis_step') != 'reminder' and not update.callback_query:
         await update.message.reply_text(
             "❌ Пожалуйста, начните добавление анализа заново.",
@@ -3621,14 +3687,14 @@ async def add_analysis_reminder(update: Update, context: ContextTypes.DEFAULT_TY
     
     if not update.callback_query:
         try:
-            hours = int(update.message.text.strip())
-            if hours < 1 or hours > 720:
+            minutes = int(update.message.text.strip())
+            if minutes < 1 or minutes > 43200:  # до 30 дней
                 raise ValueError
-            context.user_data['analysis_data']['reminder_before'] = hours
+            context.user_data['analysis_data']['reminder_before'] = minutes
             context.user_data['analysis_step'] = 'notes'
         except:
             await update.message.reply_text(
-                "❌ Введите число часов от 1 до 720",
+                "❌ Введите число минут от 1 до 43200",
                 reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
                 parse_mode=None
             )
@@ -3649,7 +3715,7 @@ async def add_analysis_reminder(update: Update, context: ContextTypes.DEFAULT_TY
     
     if query.data == "remind_custom":
         await query.edit_message_text(
-            "Введите количество часов (от 1 до 720):",
+            "Введите количество минут (от 1 до 43200):",
             parse_mode=None
         )
         return ANALYSIS_REMINDER
@@ -3658,17 +3724,18 @@ async def add_analysis_reminder(update: Update, context: ContextTypes.DEFAULT_TY
         context.user_data['analysis_step'] = 'repeat'
         return await add_analysis_repeat(update, context)
     
-    hours_map = {
-        "remind_1": 1,
-        "remind_3": 3,
-        "remind_12": 12,
-        "remind_24": 24,
-        "remind_48": 48,
-        "remind_72": 72,
-        "remind_168": 168
+    minutes_map = {
+        "remind_15": 15,
+        "remind_30": 30,
+        "remind_60": 60,
+        "remind_120": 120,
+        "remind_180": 180,
+        "remind_360": 360,
+        "remind_720": 720,
+        "remind_1440": 1440
     }
     
-    context.user_data['analysis_data']['reminder_before'] = hours_map.get(query.data, 24)
+    context.user_data['analysis_data']['reminder_before'] = minutes_map.get(query.data, 60)
     context.user_data['analysis_step'] = 'notes'
     
     await query.edit_message_text(
@@ -3721,13 +3788,22 @@ async def add_analysis_notes(update: Update, context: ContextTypes.DEFAULT_TYPE)
         "custom": f"Каждые {analysis_data.get('repeat_interval', 'N')} дней"
     }.get(analysis_data['repeat_type'], "Одноразово")
     
+    # Конвертируем минуты обратно в часы для отображения (если нужно)
+    reminder_minutes = analysis_data.get('reminder_before', 60)
+    if reminder_minutes >= 1440:
+        reminder_text = f"{reminder_minutes // 1440} дн. {reminder_minutes % 1440 // 60} ч."
+    elif reminder_minutes >= 60:
+        reminder_text = f"{reminder_minutes // 60} ч. {reminder_minutes % 60} мин."
+    else:
+        reminder_text = f"{reminder_minutes} мин."
+    
     confirm_text = f"""✅ Проверьте данные анализа/исследования:
 
 🩺 Название: {analysis_data['name']}
 📅 Дата: {scheduled_date_local.strftime('%d.%m.%Y')}
 ⏰ Время: {analysis_data.get('scheduled_time', '12:00')}
 🔄 Повторение: {repeat_text}
-⏰ Напомнить за: {analysis_data['reminder_before']} ч."""
+⏰ Напомнить за: {reminder_text}"""
 
     if analysis_data.get('notes'):
         confirm_text += f"\n📝 Заметки: {analysis_data['notes']}"
@@ -3781,13 +3857,22 @@ async def skip_notes(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "custom": f"Каждые {analysis_data.get('repeat_interval', 'N')} дней"
     }.get(analysis_data['repeat_type'], "Одноразово")
     
+    # Конвертируем минуты обратно в часы для отображения
+    reminder_minutes = analysis_data.get('reminder_before', 60)
+    if reminder_minutes >= 1440:
+        reminder_text = f"{reminder_minutes // 1440} дн. {reminder_minutes % 1440 // 60} ч."
+    elif reminder_minutes >= 60:
+        reminder_text = f"{reminder_minutes // 60} ч. {reminder_minutes % 60} мин."
+    else:
+        reminder_text = f"{reminder_minutes} мин."
+    
     confirm_text = f"""✅ Проверьте данные анализа/исследования:
 
 🩺 Название: {analysis_data['name']}
 📅 Дата: {scheduled_date_local.strftime('%d.%m.%Y')}
 ⏰ Время: {analysis_data.get('scheduled_time', '12:00')}
 🔄 Повторение: {repeat_text}
-⏰ Напомнить за: {analysis_data['reminder_before']} ч.
+⏰ Напомнить за: {reminder_text}
 
 Всё верно?"""
     
@@ -3841,14 +3926,14 @@ async def add_analysis_confirm(update: Update, context: ContextTypes.DEFAULT_TYP
             scheduled_time=scheduled_time,
             repeat_type=analysis_data['repeat_type'],
             repeat_interval=analysis_data.get('repeat_interval'),
-            reminder_before=analysis_data['reminder_before'],
+            reminder_before=analysis_data['reminder_before'],  # теперь в минутах
             notes=analysis_data.get('notes'),
             user_timezone=tz_name
         )
         db.add(analysis)
         db.flush()
         
-        reminder_time = scheduled_datetime - timedelta(hours=analysis.reminder_before)
+        reminder_time = scheduled_datetime - timedelta(minutes=analysis.reminder_before)
         if reminder_time > datetime.now(pytz.UTC):
             reminder = Reminder(
                 user_id=user_id,
@@ -4036,10 +4121,19 @@ async def list_analyses(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     pause_until_local = utc_to_local(analysis.paused_until, analysis.user_timezone)
                     pause_status = f" (пауза до {pause_until_local.strftime('%d.%m.%Y')})"
                 
+                # Конвертируем минуты в читаемый формат
+                reminder_minutes = analysis.reminder_before
+                if reminder_minutes >= 1440:
+                    reminder_text = f"{reminder_minutes // 1440} дн. {reminder_minutes % 1440 // 60} ч."
+                elif reminder_minutes >= 60:
+                    reminder_text = f"{reminder_minutes // 60} ч. {reminder_minutes % 60} мин."
+                else:
+                    reminder_text = f"{reminder_minutes} мин."
+                
                 text += f"{i}. {analysis.name}{pause_status}\n"
                 text += f"   📅 {scheduled_local.strftime('%d.%m.%Y')} в {analysis.scheduled_time}\n"
                 text += f"   📊 {status}\n"
-                text += f"   ⏰ Напомнить за {analysis.reminder_before} ч.\n"
+                text += f"   ⏰ Напомнить за: {reminder_text}\n"
                 if analysis.notes:
                     text += f"   📝 {analysis.notes}\n"
                 text += "\n"
@@ -4109,7 +4203,7 @@ async def delete_medicine(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             await query.edit_message_text(
                 "❌ Лекарство не найдено",
-                reply_markup=get_start_keyboard(),
+                reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
                 parse_mode=None
             )
     finally:
@@ -4154,7 +4248,7 @@ async def delete_analysis(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             await query.edit_message_text(
                 "❌ Анализ не найден",
-                reply_markup=get_start_keyboard(),
+                reply_markup=InlineKeyboardMarkup([get_main_menu_button()]),
                 parse_mode=None
             )
     finally:
@@ -4231,13 +4325,15 @@ async def mood_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             5: "😊 Отлично! Так держать!"
         }
         
+        local_time = utc_to_local(mood_log.created_at, get_user_timezone(user_id))
+        
         keyboard = [
             [InlineKeyboardButton("🩺 Отметить симптомы", callback_data="symptoms")],
             get_main_menu_button()
         ]
         
         await query.edit_message_text(
-            f"✅ {mood_texts[mood_score]}",
+            f"✅ {mood_texts[mood_score]}\n📅 {local_time.strftime('%d.%m.%Y %H:%M')}",
             reply_markup=InlineKeyboardMarkup(keyboard),
             parse_mode=None
         )
@@ -4592,6 +4688,10 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await extra_medicine_start(update, context)
     elif data.startswith("extra_medicine_select_"):
         await extra_medicine_select(update, context)
+    elif data == "skip_dosage":
+        await extra_medicine_dosage(update, context)
+    elif data == "skip_comment":
+        await extra_medicine_comment(update, context)
     elif data.startswith("comment_"):
         await medicine_comment_start(update, context)
     elif data.startswith("postpone_medicine_"):
@@ -4893,11 +4993,11 @@ def create_application():
             ],
             MEDICINE_DOSAGE: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, extra_medicine_dosage),
-                CommandHandler("skip", extra_medicine_dosage)
+                CallbackQueryHandler(extra_medicine_dosage, pattern="^skip_dosage$")
             ],
             MEDICINE_COMMENT: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, extra_medicine_comment),
-                CommandHandler("skip", extra_medicine_comment)
+                CallbackQueryHandler(extra_medicine_comment, pattern="^skip_comment$")
             ],
         },
         fallbacks=[
@@ -5088,7 +5188,7 @@ async def main():
         return
     
     print("🚀 Запуск ЛОР-Помощника...")
-    print("📊 Версия: 8.1.0 (Стабильная)")
+    print("📊 Версия: 9.0.0 (Финальная с улучшенным интерфейсом)")
     print("⏰ Часовой пояс: UTC (все времена в БД)")
     print("💾 Job store: SQLAlchemyJobStore (persistent)")
     print("🔄 Retry: 3 попытки")
