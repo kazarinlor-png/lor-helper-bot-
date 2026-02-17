@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 ЛОР-Помощник - Telegram бот для управления приемом лекарств и отслеживания симптомов
-Версия: 8.0.0 (Расширенная с комментариями и отложенным приемом)
+Версия: 8.1.0 (Стабильная)
 Автор: Денис Казарин (врач-оториноларинголог)
 """
 
@@ -133,20 +133,20 @@ FAMILY_CLINIC = {
 }
 
 # Информация о враче
-DOCTOR_INFO = """👨‍⚕️ *Денис Сергеевич Казарин* - врач-оториноларинголог
+DOCTOR_INFO = """👨‍⚕️ Денис Сергеевич Казарин - врач-оториноларинголог
 
-👶 *Ведет прием детей с 0 лет и взрослых*
+👶 Ведет прием детей с 0 лет и взрослых
 
-🎓 *Образование:*
+🎓 Образование:
 • 2001-2007: МГМСУ им. А.И. Евдокимова (Лечебное дело)
 • 2007-2009: Ординатура, РМАПО (Оториноларингология)
 • Доп. образование: Лазерная медицина (НПЦ лазерной медицины им. Скобелкина)
 
-🏥 *Принимает в клиниках:*
+🏥 Принимает в клиниках:
 • КИТ-клиника (Куркино)
 • Семейная клиника (Путилково)
 
-📱 *Telegram:*
+📱 Telegram:
 • Канал: @KAZARIN_LOR
 • Личный: @deniskazarin"""
 
@@ -199,7 +199,7 @@ class Medicine(Base):
     course_days = Column(Integer, nullable=True)
     repeat_type = Column(String(20), default='none')
     repeat_days = Column(Integer, nullable=True)
-    paused_until = Column(DateTime, nullable=True)  # Дата возобновления после паузы
+    paused_until = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     
     __table_args__ = (
@@ -219,7 +219,7 @@ class Analysis(Base):
     notes = Column(Text, nullable=True)
     status = Column(String(20), default='pending')
     user_timezone = Column(String(50), nullable=False)
-    paused_until = Column(DateTime, nullable=True)  # Дата возобновления после паузы
+    paused_until = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     
     __table_args__ = (
@@ -239,7 +239,7 @@ class Reminder(Base):
     retry_count = Column(Integer, default=0)
     last_error = Column(Text, nullable=True)
     postponed_until = Column(DateTime(timezone=True), nullable=True)
-    postponed_days = Column(Integer, nullable=True)  # Количество дней откладывания
+    postponed_days = Column(Integer, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     
     __table_args__ = (
@@ -251,19 +251,19 @@ class MedicineLog(Base):
     id = Column(Integer, primary_key=True)
     medicine_id = Column(Integer, nullable=False, index=True)
     user_id = Column(BigInteger, nullable=False)
-    status = Column(String(20))  # taken, skipped, postponed, extra
-    dosage = Column(String(50), nullable=True)  # Скорректированная доза
-    comment = Column(Text, nullable=True)  # Комментарий к приему
+    status = Column(String(20))
+    dosage = Column(String(50), nullable=True)
+    comment = Column(Text, nullable=True)
     taken_at = Column(DateTime(timezone=True), default=lambda: datetime.now(pytz.UTC))
     error_details = Column(Text, nullable=True)
-    course_info = Column(Text, nullable=True)  # Информация о курсе на момент приема
+    course_info = Column(Text, nullable=True)
 
 class AnalysisLog(Base):
     __tablename__ = 'analysis_logs'
     id = Column(Integer, primary_key=True)
     analysis_id = Column(Integer, nullable=False, index=True)
     user_id = Column(BigInteger, nullable=False)
-    status = Column(String(20))  # completed, skipped, postponed
+    status = Column(String(20))
     completed_at = Column(DateTime(timezone=True), default=lambda: datetime.now(pytz.UTC))
     notes = Column(Text, nullable=True)
 
@@ -492,14 +492,33 @@ rate_limiter = RateLimiter()
 
 # ============== СОСТОЯНИЯ ДЛЯ CONVERSATION HANDLER ==============
 (
-    MEDICINE_NAME, MEDICINE_TIME, MEDICINE_COURSE_TYPE, MEDICINE_COURSE_DAYS,
-    MEDICINE_REPEAT, MEDICINE_START_DATE, MEDICINE_CONFIRM,
-    ANALYSIS_NAME, ANALYSIS_DATE, ANALYSIS_TIME, ANALYSIS_TIME_HOUR, ANALYSIS_TIME_MINUTE,
-    ANALYSIS_REPEAT, ANALYSIS_REMINDER, ANALYSIS_NOTES, ANALYSIS_CONFIRM,
-    SYMPTOM_TEXT, SYMPTOM_SEVERITY,
-    MEDICINE_COMMENT, MEDICINE_DOSAGE, MEDICINE_EXTRA_REASON,
-    POSTPONE_MEDICINE, POSTPONE_ANALYSIS, PAUSE_MEDICINE, PAUSE_ANALYSIS
-) = range(24)
+    MEDICINE_NAME,                # 0
+    MEDICINE_TIME,                 # 1
+    MEDICINE_COURSE_TYPE,          # 2
+    MEDICINE_COURSE_DAYS,          # 3
+    MEDICINE_REPEAT,               # 4
+    MEDICINE_START_DATE,           # 5
+    MEDICINE_CONFIRM,              # 6
+    ANALYSIS_NAME,                 # 7
+    ANALYSIS_DATE,                 # 8
+    ANALYSIS_TIME,                 # 9
+    ANALYSIS_TIME_HOUR,            # 10
+    ANALYSIS_TIME_MINUTE,          # 11
+    ANALYSIS_REPEAT,               # 12
+    ANALYSIS_REMINDER,             # 13
+    ANALYSIS_NOTES,                # 14
+    ANALYSIS_CONFIRM,              # 15
+    SYMPTOM_TEXT,                  # 16
+    SYMPTOM_SEVERITY,              # 17
+    MEDICINE_COMMENT,              # 18
+    MEDICINE_DOSAGE,               # 19
+    MEDICINE_EXTRA_REASON,         # 20
+    POSTPONE_MEDICINE,             # 21
+    POSTPONE_ANALYSIS,             # 22
+    PAUSE_MEDICINE,                # 23
+    PAUSE_ANALYSIS,                # 24
+    EXTRA_MEDICINE_SELECT          # 25
+) = range(26)  # 26 состояний (0-25)
 
 # ============== ФУНКЦИИ ДЛЯ РАБОТЫ С ЧАСОВЫМИ ПОЯСАМИ ==============
 def get_user_timezone(user_id: int) -> str:
@@ -1193,7 +1212,7 @@ async def send_reminder_job(reminder_id: int):
                 db.commit()
                 return
             
-            text = f"💊 *Время принять лекарство!*\n\n{medicine.name}"
+            text = f"💊 Время принять лекарство!\n\n{medicine.name}"
             reply_markup = get_medicine_inline_keyboard(medicine.id)
             
         elif reminder.reminder_type == 'analysis':
@@ -1216,9 +1235,9 @@ async def send_reminder_job(reminder_id: int):
                 analysis_date = analysis.scheduled_date.astimezone(pytz.UTC)
             
             scheduled_local = utc_to_local(analysis_date, analysis.user_timezone)
-            text = f"🩺 *Напоминание об анализе/исследовании!*\n\n{analysis.name}\n📅 {scheduled_local.strftime('%d.%m.%Y')} в {analysis.scheduled_time}"
+            text = f"🩺 Напоминание об анализе/исследовании!\n\n{analysis.name}\n📅 {scheduled_local.strftime('%d.%m.%Y')} в {analysis.scheduled_time}"
             if analysis.notes:
-                text += f"\n\n📝 *Заметки:* {analysis.notes}"
+                text += f"\n\n📝 Заметки: {analysis.notes}"
             
             reply_markup = get_analysis_inline_keyboard(analysis.id)
         
@@ -1816,7 +1835,7 @@ async def extra_medicine_start(update: Update, context: ContextTypes.DEFAULT_TYP
                 parse_mode=None
             )
         
-        return MEDICINE_EXTRA_REASON
+        return EXTRA_MEDICINE_SELECT
     finally:
         db.close()
 
@@ -4871,7 +4890,7 @@ def create_application():
             CallbackQueryHandler(extra_medicine_start, pattern="^extra_medicine$")
         ],
         states={
-            MEDICINE_EXTRA_REASON: [
+            EXTRA_MEDICINE_SELECT: [
                 CallbackQueryHandler(extra_medicine_select, pattern="^extra_medicine_select_"),
             ],
             MEDICINE_DOSAGE: [
@@ -5071,7 +5090,7 @@ async def main():
         return
     
     print("🚀 Запуск ЛОР-Помощника...")
-    print("📊 Версия: 8.0.0 (Расширенная)")
+    print("📊 Версия: 8.1.0 (Стабильная)")
     print("⏰ Часовой пояс: UTC (все времена в БД)")
     print("💾 Job store: SQLAlchemyJobStore (persistent)")
     print("🔄 Retry: 3 попытки")
